@@ -11,7 +11,6 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/registros")
-@CrossOrigin(origins = "*")
 public class RegistroCumplimientoControlador {
 
     @Autowired
