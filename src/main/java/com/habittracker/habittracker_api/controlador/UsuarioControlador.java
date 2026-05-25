@@ -42,4 +42,25 @@ public class UsuarioControlador {
         usuario.setId(id);
         return ResponseEntity.ok(usuarioServicio.actualizar(usuario));
     }
+    @PostMapping("/google")
+public ResponseEntity<?> loginConGoogle(@RequestBody java.util.Map<String, String> datos) {
+    try {
+        String email = datos.get("email");
+        String nombre = datos.get("nombre");
+        
+        // Buscar si el usuario ya existe
+        return usuarioServicio.buscarPorEmail(email)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> {
+                // Crear usuario nuevo con Google
+                Usuario nuevo = new Usuario();
+                nuevo.setEmail(email);
+                nuevo.setNombre(nombre);
+                nuevo.setPassword("GOOGLE_AUTH_" + email);
+                return ResponseEntity.ok(usuarioServicio.registrar(nuevo));
+            });
+    } catch (Exception e) {
+        return ResponseEntity.badRequest().body("Error al autenticar con Google");
+    }
+}
 }

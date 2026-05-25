@@ -28,6 +28,10 @@ public class UsuarioServicio {
         return usuarioRepositorio.findById(id);
     }
 
+    public Optional<Usuario> buscarPorEmail(String email) {
+        return usuarioRepositorio.findByEmail(email);
+    }
+
     public Usuario actualizar(Usuario usuario) {
         return usuarioRepositorio.save(usuario);
     }
