@@ -9,7 +9,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/habitos")
-@CrossOrigin(origins = "*")
 public class HabitoControlador {
 
     @Autowired
