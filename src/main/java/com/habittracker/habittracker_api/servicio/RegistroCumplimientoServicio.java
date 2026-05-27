@@ -6,9 +6,10 @@ import com.habittracker.habittracker_api.repositorio.HabitoRepositorio;
 import com.habittracker.habittracker_api.repositorio.RegistroCumplimientoRepositorio;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RegistroCumplimientoServicio {
@@ -27,19 +28,27 @@ public class RegistroCumplimientoServicio {
         Habito habito = habitoRepositorio.findById(habitoId)
                 .orElseThrow(() -> new RuntimeException("Hábito no encontrado"));
 
+        // Verificar si completó ayer — si no, reiniciar racha
+        boolean completoAyer = registroRepositorio.existsByHabitoIdAndFecha(
+                habitoId, LocalDate.now().minusDays(1));
+
+        if (!completoAyer) {
+            habito.setRachaActual(0);
+        }
+
         RegistroCumplimiento registro = new RegistroCumplimiento();
         registro.setHabito(habito);
         registro.setFecha(LocalDate.now());
         registro.setCompletado(true);
         registro.setNotas(notas);
 
-        // Actualizar racha
+        // Incrementar racha
         habito.setRachaActual(habito.getRachaActual() + 1);
         if (habito.getRachaActual() > habito.getMejorRacha()) {
             habito.setMejorRacha(habito.getRachaActual());
         }
-        habitoRepositorio.save(habito);
 
+        habitoRepositorio.save(habito);
         return registroRepositorio.save(registro);
     }
 
@@ -54,21 +63,23 @@ public class RegistroCumplimientoServicio {
     public boolean estaCompletadoHoy(Long habitoId) {
         return registroRepositorio.existsByHabitoIdAndFecha(habitoId, LocalDate.now());
     }
+
     @Transactional
     public void desmarcarHoy(Long habitoId) {
-    LocalDate hoy = LocalDate.now();
-    if (!registroRepositorio.existsByHabitoIdAndFecha(habitoId, hoy)) {
-        throw new RuntimeException("El hábito no estaba completado hoy");
-    }
+        LocalDate hoy = LocalDate.now();
+        if (!registroRepositorio.existsByHabitoIdAndFecha(habitoId, hoy)) {
+            throw new RuntimeException("El hábito no estaba completado hoy");
+        }
 
-    Habito habito = habitoRepositorio.findById(habitoId)
-            .orElseThrow(() -> new RuntimeException("Hábito no encontrado"));
+        Habito habito = habitoRepositorio.findById(habitoId)
+                .orElseThrow(() -> new RuntimeException("Hábito no encontrado"));
 
-    registroRepositorio.deleteByHabitoIdAndFecha(habitoId, hoy);
+        registroRepositorio.deleteByHabitoIdAndFecha(habitoId, hoy);
 
-    if (habito.getRachaActual() > 0) {
-        habito.setRachaActual(habito.getRachaActual() - 1);
-    }
-    habitoRepositorio.save(habito);
+        if (habito.getRachaActual() > 0) {
+            habito.setRachaActual(habito.getRachaActual() - 1);
+        }
+
+        habitoRepositorio.save(habito);
     }
 }
