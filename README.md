@@ -125,12 +125,11 @@ Desarrollar una API robusta para la gestión de hábitos y seguimiento de progre
 
 ---
 
-## 👨‍💻 Autor
+## 👨‍💻 Autores
 
 - Jose Ramirezkqa
-
-GitHub:
-https://github.com/JoseRamirezkqa
+- Steven Rey Maldonado
+- María José Hernández 
 
 ---
 
